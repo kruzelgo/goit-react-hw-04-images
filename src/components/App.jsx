@@ -53,9 +53,9 @@ export const App = () => {
     setPage(prevPage => prevPage + 1);
   }, []);
 
-  const handleImageClick = useCallback((imageUrl, imageAlt) => {
+  const handleImageClick = useCallback((imageUrl, modalAlt) => {
     setSelectedImageUrl(imageUrl);
-    setModalAlt(imageAlt);
+    setModalAlt(modalAlt);
     setShowModal(true);
   }, []);
 
