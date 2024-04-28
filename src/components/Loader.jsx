@@ -4,7 +4,6 @@ import './styles.css';
 
 const Loader = () => {
   return (
-    // <div className="loaderContainer">
     <BallTriangle
       height={100}
       width={100}
@@ -13,7 +12,6 @@ const Loader = () => {
       ariaLabel="ball-triangle-loading"
       visible={true}
     />
-    // </div>
   );
 };
 
