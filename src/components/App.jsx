@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Modal from './Modal';
-import fetchData from './fetchData';
+import { fetchData } from './fetchData';
 import './styles.css';
 
 const perPage = 12;
 
-export const App = () => {
+export function App() {
   const [images, setImages] = useState([]);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -17,56 +17,52 @@ export const App = () => {
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
   const [modalAlt, setModalAlt] = useState('');
   const [loadMore, setLoadMore] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   useEffect(() => {
     if (!query) return;
 
-    const fetchDataFromApi = async () => {
+    const fetchDataAndUpdateState = async () => {
       setLoading(true);
-      try {
-        const data = await fetchData(query, page);
-        const { hits, totalHits } = data;
-
-        const newImages = hits.filter(newImage =>
-          images.every(existingImage => existingImage.id !== newImage.id)
-        );
-
+      const { newImages, totalHits, error } = await fetchData(
+        query,
+        page,
+        images
+      );
+      if (!error) {
         setImages(prevImages => [...prevImages, ...newImages]);
         setLoadMore(page < Math.ceil(totalHits / perPage));
-      } catch (error) {
-        console.error('Error fetching images:', error);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
 
-    fetchDataFromApi();
-  }, [query, page, images]);
+    fetchDataAndUpdateState();
+  }, [query, page]);
 
-  const handleSubmit = useCallback(query => {
-    setQuery(query);
+  const handleSubmit = newQuery => {
+    setQuery(newQuery);
     setImages([]);
     setPage(1);
-  }, []);
+    setSearched(true);
+  };
 
-  const handleLoadMore = useCallback(() => {
+  const handleLoadMore = () => {
     setPage(prevPage => prevPage + 1);
-  }, []);
+  };
 
-  const handleImageClick = useCallback((imageUrl, modalAlt) => {
+  const handleImageClick = (imageUrl, imageAlt) => {
     setSelectedImageUrl(imageUrl);
-    setModalAlt(modalAlt);
+    setModalAlt(imageAlt);
     setShowModal(true);
-  }, []);
+  };
 
-  const handleCloseModal = useCallback(() => {
+  const handleCloseModal = () => {
     setShowModal(false);
-  }, []);
+  };
 
   return (
     <div
       style={{
-        // height: '100vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -76,7 +72,8 @@ export const App = () => {
     >
       <div>
         <Searchbar onSubmit={handleSubmit} />
-        <ImageGallery onImageClick={handleImageClick} />
+        {searched && images.length === 0 && <p>No results found</p>}
+        <ImageGallery images={images} onImageClick={handleImageClick} />
 
         {loadMore && <Button onLoadMore={handleLoadMore} loading={loading} />}
         {showModal && (
@@ -89,6 +86,4 @@ export const App = () => {
       </div>
     </div>
   );
-};
-
-// export default App;
+}
