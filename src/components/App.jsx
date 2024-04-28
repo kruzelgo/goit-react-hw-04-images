@@ -37,6 +37,7 @@ export function App() {
     };
 
     fetchDataAndUpdateState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, page]);
 
   const handleSubmit = newQuery => {
