@@ -6,9 +6,7 @@ import Modal from './Modal';
 import { fetchData } from './fetchData';
 import './styles.css';
 
-const perPage = 12;
-
-export function App() {
+export const App = () => {
   const [images, setImages] = useState([]);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -24,20 +22,19 @@ export function App() {
 
     const fetchDataAndUpdateState = async () => {
       setLoading(true);
-      const { newImages, totalHits, error } = await fetchData(
-        query,
-        page,
-        images
-      );
-      if (!error) {
-        setImages(prevImages => [...prevImages, ...newImages]);
-        setLoadMore(page < Math.ceil(totalHits / perPage));
+
+      try {
+        const { hits, totalHits } = await fetchData(query, page);
+        setImages(prevImages => [...prevImages, ...hits]);
+        setLoadMore(page < Math.ceil(totalHits / 12));
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchDataAndUpdateState();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, page]);
 
   const handleSubmit = newQuery => {
@@ -87,4 +84,5 @@ export function App() {
       </div>
     </div>
   );
-}
+};
+export default App;
